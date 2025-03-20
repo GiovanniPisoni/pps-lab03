@@ -33,7 +33,9 @@ object Sequences: // Essentially, generic linkedlists
      * E.g., [10, 20, 30], 0 => [10, 20, 30]
      * E.g., [], 2 => []
      */
-    def skip[A](s: Sequence[A])(n: Int): Sequence[A] = ???
+    def skip[A](s: Sequence[A])(n: Int): Sequence[A] = s match
+      case Cons(_, t) if n > 0 => skip(t)(n - 1)
+      case _ => s
 
     /*
      * Zip two sequences
@@ -41,7 +43,11 @@ object Sequences: // Essentially, generic linkedlists
      * E.g., [10], [] => []
      * E.g., [], [] => []
      */
-    def zip[A, B](first: Sequence[A], second: Sequence[B]): Sequence[(A, B)] = ???
+    def zip[A, B](first: Sequence[A], second: Sequence[B]): Sequence[(A, B)] = first match
+      case Cons(h1, t1) => second match
+        case Cons(h2, t2) => Cons((h1, h2), zip(t1, t2))
+        case _ => Nil()
+      case _ => Nil()
 
     /*
      * Concatenate two sequences
@@ -49,7 +55,9 @@ object Sequences: // Essentially, generic linkedlists
      * E.g., [10], [] => [10]
      * E.g., [], [] => []
      */
-    def concat[A](s1: Sequence[A], s2: Sequence[A]): Sequence[A] = ???
+    def concat[A](s1: Sequence[A], s2: Sequence[A]): Sequence[A] = s1 match
+      case Cons(h, t) => Cons(h, concat(t, s2))
+      case _ => s2
 
     /*
      * Reverse the sequence
@@ -57,7 +65,9 @@ object Sequences: // Essentially, generic linkedlists
      * E.g., [10] => [10]
      * E.g., [] => []
      */
-    def reverse[A](s: Sequence[A]): Sequence[A] = ???
+    def reverse[A](s: Sequence[A]): Sequence[A] = s match
+      case Cons(h, t) => concat(reverse(t), Cons(h, Nil()))
+      case _ => Nil()
 
     /*
      * Map the elements of the sequence to a new sequence and flatten the result
@@ -65,35 +75,53 @@ object Sequences: // Essentially, generic linkedlists
      * E.g., [10, 20, 30], calling with mapper(v => [v]) returns [10, 20, 30]
      * E.g., [10, 20, 30], calling with mapper(v => Nil()) returns []
      */
-    def flatMap[A, B](s: Sequence[A])(mapper: A => Sequence[B]): Sequence[B] = ???
+    def flatMap[A, B](s: Sequence[A])(mapper: A => Sequence[B]): Sequence[B] = s match
+      case Cons(h, t) => concat(mapper(h), flatMap(t)(mapper))
+      case _ => Nil()
 
     /*
      * Get the minimum element in the sequence
      * E.g., [30, 20, 10] => 10
      * E.g., [10, 1, 30] => 1
      */
-    def min(s: Sequence[Int]): Optional[Int] = ???
+    def min(s: Sequence[Int]): Optional[Int] = s match
+      case Cons(h, t) => t match
+        case Cons(h2, t2) => min(if h < h2 then Cons(h, t2) else Cons(h2, t2))
+        case _ => Optional.Just(h)
+      case _ => Empty()
 
     /*
      * Get the elements at even indices
      * E.g., [10, 20, 30] => [10, 30]
      * E.g., [10, 20, 30, 40] => [10, 30]
      */
-    def evenIndices[A](s: Sequence[A]): Sequence[A] = ???
+    def evenIndices[A](s: Sequence[A]): Sequence[A] = s match
+      case Cons(h, t) => t match
+        case Cons(h2 , t2) => Cons(h, evenIndices(t2))
+        case _ => Cons(h, Nil())
+      case _ => Nil()
+
 
     /*
      * Check if the sequence contains the element
      * E.g., [10, 20, 30] => true if elem is 20
      * E.g., [10, 20, 30] => false if elem is 40
      */
-    def contains[A](s: Sequence[A])(elem: A): Boolean = ???
+    def contains[A](s: Sequence[A])(elem: A): Boolean = s match
+      case Cons(h, t) => if h == elem then true else contains(t)(elem)
+      case _ => false
 
     /*
      * Remove duplicates from the sequence
      * E.g., [10, 20, 10, 30] => [10, 20, 30]
      * E.g., [10, 20, 30] => [10, 20, 30]
      */
-    def distinct[A](s: Sequence[A]): Sequence[A] = ???
+    def distinct[A](s: Sequence[A]): Sequence[A] =
+      def removeDuplicates(seen: Sequence[A], remaining: Sequence[A]): Sequence[A] = remaining match
+        case Cons(h, t)  => if contains(seen)(h) then removeDuplicates(seen, t) else Cons(h, removeDuplicates(Cons(h, seen), t))
+        case _ => Nil()
+
+      removeDuplicates(Nil(), s)
 
     /*
      * Group contiguous elements in the sequence
