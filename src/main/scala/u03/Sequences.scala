@@ -86,7 +86,9 @@ object Sequences: // Essentially, generic linkedlists
      */
     def min(s: Sequence[Int]): Optional[Int] = s match
       case Cons(h, t) => t match
-        case Cons(h2, t2) => min(if h < h2 then Cons(h, t2) else Cons(h2, t2))
+        case Cons(h2, t2) => min(if h < h2
+                                 then Cons(h, t2)
+                                 else Cons(h2, t2))
         case _ => Optional.Just(h)
       case _ => Empty()
 
@@ -108,7 +110,9 @@ object Sequences: // Essentially, generic linkedlists
      * E.g., [10, 20, 30] => false if elem is 40
      */
     def contains[A](s: Sequence[A])(elem: A): Boolean = s match
-      case Cons(h, t) => if h == elem then true else contains(t)(elem)
+      case Cons(h, t) => if h == elem
+                         then true
+                         else contains(t)(elem)
       case _ => false
 
     /*
@@ -118,7 +122,9 @@ object Sequences: // Essentially, generic linkedlists
      */
     def distinct[A](s: Sequence[A]): Sequence[A] =
       def removeDuplicates(seen: Sequence[A], remaining: Sequence[A]): Sequence[A] = remaining match
-        case Cons(h, t)  => if contains(seen)(h) then removeDuplicates(seen, t) else Cons(h, removeDuplicates(Cons(h, seen), t))
+        case Cons(h, t)  => if contains(seen)(h)
+                            then removeDuplicates(seen, t)
+                            else Cons(h, removeDuplicates(Cons(h, seen), t))
         case _ => Nil()
 
       removeDuplicates(Nil(), s)
@@ -129,14 +135,30 @@ object Sequences: // Essentially, generic linkedlists
      * E.g., [10, 20, 30] => [[10], [20], [30]]
      * E.g., [10, 20, 20, 30] => [[10], [20, 20], [30]]
      */
-    def group[A](s: Sequence[A]): Sequence[Sequence[A]] = ???
+    def group[A](s: Sequence[A]): Sequence[Sequence[A]] =
+      def makeGroups(group: Sequence[A], remaining: Sequence[A]): Sequence[Sequence[A]] = remaining match
+        case Cons(h, t) => group match
+          case Cons(h2, t2) => if h == h2
+                               then makeGroups(Cons(h, group), t)
+                               else Cons(group, makeGroups(Cons(h, Nil()), t))
+          case _ => makeGroups(Cons(h, Nil()), t)
+        case _ => Cons(group, Nil())
+
+      s match
+        case Cons(h, t) => makeGroups(Cons(h, Nil()), t)
+        case _ => Nil()
 
     /*
      * Partition the sequence into two sequences based on the predicate
      * E.g., [10, 20, 30] => ([10], [20, 30]) if pred is (_ < 20)
      * E.g., [11, 20, 31] => ([20], [11, 31]) if pred is (_ % 2 == 0)
      */
-    def partition[A](s: Sequence[A])(pred: A => Boolean): (Sequence[A], Sequence[A]) = ???
+    def partition[A](s: Sequence[A])(pred: A => Boolean): (Sequence[A], Sequence[A]) = s match
+      case Cons(h, t) => val (leftSeq, rightSeq) = partition(t)(pred)
+                         if pred(h)
+                         then (Cons(h, leftSeq), rightSeq)
+                         else (leftSeq, Cons(h, rightSeq))
+      case _ => (Nil(), Nil())
 
   end Sequence
 end Sequences
