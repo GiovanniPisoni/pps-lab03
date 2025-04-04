@@ -6,6 +6,8 @@ import u03.Optionals.Optional
 import u03.Optionals.Optional.{Empty, Just}
 import u03.Sequences.Sequence
 import u03.Sequences.Sequence.{Cons, Nil, filter, map}
+import u03.Streams.*
+import u03.Streams.Stream.*
 
 import scala.annotation.tailrec
 
@@ -169,4 +171,17 @@ object Tasks_Lab03:
     foldLeft(map(teacher) {
       case Teacher(_, c) => c
     })(0)((acc, elem) => acc + 1)
+
+//------------------------------TASK3------------------------------
+
+  def fill[A](n: Int)(k: A): Stream[A] = n match
+    case 0 => empty()
+    case _ => cons(k, fill(n-1)(k))
+
+  def fibonacci(): Stream[Int] =
+    def _fib(n1: Int, n2: Int): Stream[Int] =
+      cons(n1 + n2, _fib(n2, n1 + n2))
+    cons(0, cons(1, _fib(0, 1)))
+
+
 

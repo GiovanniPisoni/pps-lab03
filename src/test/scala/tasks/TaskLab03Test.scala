@@ -5,8 +5,10 @@ import u02.Modules.Person
 import u02.Modules.Person.*
 import u03.Sequences.Sequence
 import u03.Sequences.Sequence.*
+import u03.Streams.Stream
+import u03.Streams.Stream.{Empty, empty}
 
-class Task2Test:
+class Lab03Task2Lab3Test:
 
   val sequence : Sequence[Person] = Cons(Teacher("Viroli", "PPS"),
                 Cons(Teacher("Ricci", "PCD"),
@@ -23,3 +25,13 @@ class Task2Test:
   @Test def getTotalNumOfCoursesTest() =
     assertEquals(2, getTotalNumOfCourses(sequence))
     assertEquals(0, getTotalNumOfCourses(Nil()))
+
+class Lab03Task3Test:
+
+  @Test def testFill() =
+    assertEquals(Cons("1", Cons("1", Nil())), Stream.toList(Stream.fill(2)("1")))
+    assertEquals(empty(), fill(0)("1"))
+
+  @Test def testFibonacci() =
+    val fib = Stream.fibonacci()
+    assertEquals(Cons(0, Cons(1, Cons(1, Cons(2, Cons(3, Cons(5, Nil())))))), Stream.toList(Stream.take(fib)(6)))
